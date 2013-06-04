@@ -14,11 +14,11 @@ D-Buddy is a deployment server written in the Zibo framework.
 To install a version of D-Buddy, run the following commands:
 
     curl -sS https://raw.github.com/kayalion/zibo/master/install.sh | sh
-    composer require dbud/core
+    composer require dbud/core zibo/minify
     
 If _composer_ is not installed globally, you can run:
 
-    ./composer.phar require dbud/core
+    ./composer.phar require dbud/core zibo/minify
     
 After all the modules are downloaded and installed, run the following commands to setup your database:
 

@@ -109,7 +109,13 @@ abstract class AbstractSshProtocol extends AbstractProtocol {
                 throw new Exception('No SSH private key file set');
             }
 
-            if (!@ssh2_auth_pubkey_file($this->ssh, $server->remoteUsername, $this->publicKeyFile, $this->privateKeyFile, $this->privateKeyPassphrase)) {
+            if ($this->privateKeyPassphrase) {
+                $passphrase = $this->securityManager->decrypt($this->privateKeyPassphrase);
+            } else {
+                $passphrase = null;
+            }
+
+            if (!@ssh2_auth_pubkey_file($this->ssh, $server->remoteUsername, $this->publicKeyFile, $this->privateKeyFile, $passphrase)) {
                 $exception = new ValidationException();
                 $exception->addError('remoteUsername', new ValidationError('error.remote.host.authenticate.key', 'Could not authenticate with SSH key'));
 

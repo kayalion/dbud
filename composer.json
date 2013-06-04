@@ -15,6 +15,7 @@
         "zibo/form": "*",
         "zibo/ftp": "*",
         "zibo/i18n": "*",
+        "zibo/i18n.en": "*",
         "zibo/jquery": "*",
         "zibo/queue": "*",
         "zibo/security": "*",

@@ -6,11 +6,18 @@ To enable key authentication you need to set the paths to the files containing t
 Use the following parameters to set the keys of the deployment server:
 
 * __dbud.ssh.key.public__:  
-Path to the public key
+Path to the public key file
 * __dbud.ssh.key.private__:  
-Path to the private key
+Path to the private key file
 * __dbud.ssh.key.passphrase__:  
-Passphrase for the private key file
+Encrypted passphrase for the private key file
+
+### Generating Passphrase Parameter
+
+Run following commands in the [Zibo console](/manual/page/Core/Console) (interactive shell):
+    
+    php $sm = $this->zibo->getDependency('zibo\\library\\security\\SecurityManager');
+    php echo $sm->encrypt('passphrase') . "\n"
     
 ## Queue Worker
 
