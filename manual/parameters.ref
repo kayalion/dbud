@@ -1,0 +1,3 @@
+dbud.ssh.key.public         Path to the public SSH key of D-Buddy
+dbud.ssh.key.private        Path to the private SSH key of D-Buddy
+dbud.ssh.key.passphrase     Passphrase for the private SSH key of D-Buddy

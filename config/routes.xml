@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <route path="/" controller="dbud\controller\IndexController" action="indexAction" methods="get,head" id="dbud.index" />    
+    <route path="/hook/deploy/project/%project%/environment/%slug%/%code%" controller="dbud\controller\EnvironmentController" action="autoDeployAction" methods="post" id="dbud.environment.deploy.auto" />    
+    <route path="/project" controller="dbud\controller\ProjectController" action="overviewAction" methods="get,head" id="dbud.project.overview" />    
+    <route path="/project" controller="dbud\controller\ProjectController" action="formAction" methods="post" id="dbud.project.add.submit" />    
+    <route path="/project/add" controller="dbud\controller\ProjectController" action="formAction" methods="get,head" id="dbud.project.add" />    
+    <route path="/project/%slug%" controller="dbud\controller\ProjectController" action="detailAction" methods="get,head" id="dbud.project.detail" />    
+    <route path="/project/%slug%" controller="dbud\controller\ProjectController" action="formAction" methods="post" id="dbud.project.edit.submit" />    
+    <route path="/project/%slug%/edit" controller="dbud\controller\ProjectController" action="formAction" methods="get,head" id="dbud.project.edit" />    
+    <route path="/project/%slug%/delete" controller="dbud\controller\ProjectController" action="deleteAction" methods="post" id="dbud.project.delete" />    
+    <route path="/project/%slug%/queue" controller="dbud\controller\ProjectController" action="queueAction" methods="get,head" id="dbud.project.queue" />    
+    <route path="/project/%project%/environment" controller="dbud\controller\EnvironmentController" action="formAction" methods="post" id="dbud.environment.add.submit" />    
+    <route path="/project/%project%/environment/add" controller="dbud\controller\EnvironmentController" action="formAction" methods="get,head" id="dbud.environment.add" />    
+    <route path="/project/%project%/environment/%slug%" controller="dbud\controller\EnvironmentController" action="detailAction" methods="get,head" id="dbud.environment.detail" />    
+    <route path="/project/%project%/environment/%slug%" controller="dbud\controller\EnvironmentController" action="formAction" methods="post" id="dbud.environment.edit.submit" />    
+    <route path="/project/%project%/environment/%slug%/edit" controller="dbud\controller\EnvironmentController" action="formAction" methods="get,head" id="dbud.environment.edit" />    
+    <route path="/project/%project%/environment/%slug%/delete" controller="dbud\controller\EnvironmentController" action="deleteAction" methods="post" id="dbud.environment.delete" />    
+    <route path="/project/%project%/environment/%slug%/deploy" controller="dbud\controller\EnvironmentController" action="deployAction" methods="get,head,post" id="dbud.environment.deploy" />    
+    <route path="/project/%project%/environment/%slug%/queue" controller="dbud\controller\EnvironmentController" action="queueAction" methods="get,head" id="dbud.environment.queue" />    
+    <route path="/project/%project%/environment/%environment%/server" controller="dbud\controller\ServerController" action="formAction" methods="post" id="dbud.server.add.submit" />    
+    <route path="/project/%project%/environment/%environment%/server/add" controller="dbud\controller\ServerController" action="formAction" methods="get,head" id="dbud.server.add" />    
+    <route path="/project/%project%/environment/%environment%/server/%slug%" controller="dbud\controller\ServerController" action="detailAction" methods="get,head" id="dbud.server.detail" />    
+    <route path="/project/%project%/environment/%environment%/server/%slug%" controller="dbud\controller\ServerController" action="formAction" methods="post" id="dbud.server.edit.submit" />    
+    <route path="/project/%project%/environment/%environment%/server/%slug%/edit" controller="dbud\controller\ServerController" action="formAction" methods="get,head" id="dbud.server.edit" />    
+    <route path="/project/%project%/environment/%environment%/server/%slug%/delete" controller="dbud\controller\ServerController" action="deleteAction" methods="post" id="dbud.server.delete" />    
+    <route path="/ssh-key" controller="dbud\controller\IndexController" action="sshKeyAction" methods="get,head" id="dbud.ssh.key" />    
+</routes>

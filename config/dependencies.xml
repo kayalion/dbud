@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container>
+    <dependency class="dbud\Module" />
+    
+    <dependency interface="dbud\model\protocol\Protocol" class="dbud\model\protocol\SftpProtocol" id="sftp">
+        <call method="setZibo">
+            <argument name="zibo" type="dependency">
+                <property name="interface" value="zibo\core\Zibo" />
+            </argument>
+        </call>
+        <call method="setSecurityManager">
+            <argument name="securityManager" type="dependency">
+                <property name="interface" value="zibo\library\security\SecurityManager" />
+            </argument>
+        </call>
+        <call method="setPublicKeyFile">
+            <argument name="publicKeyFile" type="parameter">
+                <property name="key" value="dbud.ssh.key.public" />
+            </argument>
+        </call>
+        <call method="setPrivateKeyFile">
+            <argument name="privateKeyFile" type="parameter">
+                <property name="key" value="dbud.ssh.key.private" />
+            </argument>
+        </call>
+        <call method="setPrivateKeyPassphrase">
+            <argument name="privateKeyPassphrase" type="parameter">
+                <property name="key" value="dbud.ssh.key.passphrase" />
+            </argument>
+        </call>
+    </dependency>
+
+    <dependency interface="dbud\model\protocol\Protocol" class="dbud\model\protocol\FtpProtocol" id="ftp">
+        <call method="setZibo">
+            <argument name="zibo" type="dependency">
+                <property name="interface" value="zibo\core\Zibo" />
+            </argument>
+        </call>
+        <call method="setSecurityManager">
+            <argument name="securityManager" type="dependency">
+                <property name="interface" value="zibo\library\security\SecurityManager" />
+            </argument>
+        </call>
+    </dependency>
+    
+    <dependency interface="dbud\model\protocol\Protocol" class="dbud\model\protocol\SshProtocol" id="ssh">
+        <call method="setZibo">
+            <argument name="zibo" type="dependency">
+                <property name="interface" value="zibo\core\Zibo" />
+            </argument>
+        </call>
+        <call method="setSecurityManager">
+            <argument name="securityManager" type="dependency">
+                <property name="interface" value="zibo\library\security\SecurityManager" />
+            </argument>
+        </call>
+        <call method="setPublicKeyFile">
+            <argument name="publicKeyFile" type="parameter">
+                <property name="key" value="dbud.ssh.key.public" />
+            </argument>
+        </call>
+        <call method="setPrivateKeyFile">
+            <argument name="privateKeyFile" type="parameter">
+                <property name="key" value="dbud.ssh.key.private" />
+            </argument>
+        </call>
+        <call method="setPrivateKeyPassphrase">
+            <argument name="privateKeyPassphrase" type="parameter">
+                <property name="key" value="dbud.ssh.key.passphrase" />
+            </argument>
+        </call>
+    </dependency>    
+</container>

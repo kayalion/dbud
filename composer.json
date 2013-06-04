@@ -1,0 +1,25 @@
+{
+    "name": "dbud/core",
+    "description": "D-Buddy deployment server",
+    "version": "0.1.0",
+    "type": "zibo-module",
+    "authors": [
+        {
+            "name": "Joris Vandeweerd",
+            "email": "joris@statik.be"
+        }
+    ],
+    "require": {
+        "zibo/app": "*",
+        "zibo/core": "*",
+        "zibo/form": "*",
+        "zibo/ftp": "*",
+        "zibo/i18n": "*",
+        "zibo/jquery": "*",
+        "zibo/queue": "*",
+        "zibo/security": "*",
+        "zibo/template": "*",
+        "zibo/template.smarty": "*",
+        "zibo/validation": "*"
+    }
+}

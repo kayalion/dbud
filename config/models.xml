@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<models>
+    <model name="DbudProject" modelClass="dbud\model\ProjectModel" dataClass="dbud\model\data\ProjectData" log="true">
+        <field name="name" type="string">
+            <validation name="required" />
+        </field>
+        <field name="repository" type="string" />
+        <field name="state" type="string" />
+        <field name="environments" model="DbudEnvironment" relation="hasMany" dependant="true" />
+        <field name="slug" type="string">
+            <validation name="required" />
+        </field>
+        
+        <format name="title">{name}</format>
+        <format name="teaser">{repository}</format>
+    </model>
+    
+    <model name="DbudEnvironment" modelClass="dbud\model\EnvironmentModel" dataClass="dbud\model\data\EnvironmentData" log="true">
+        <field name="project" model="DbudProject" relation="belongsTo" />
+        <field name="name" type="string">
+            <validation name="required" />
+        </field>
+        <field name="mode" type="string" />
+        <field name="branch" type="string" />
+        <field name="servers" model="DbudServer" relation="hasMany" dependant="true" />
+        <field name="slug" type="string">
+            <validation name="required" />
+        </field>
+        
+        <format name="title">{name}</format>
+    </model>
+    
+    <model name="DbudQueue" modelClass="dbud\model\QueueModel" dataClass="dbud\model\data\QueueData">
+        <field name="job" model="Queue" relation="belongsTo" />
+        <field name="dataType" type="string">
+            <validation name="required" />
+        </field>
+        <field name="dataId" type="string">
+            <validation name="required" />
+        </field>
+        <field name="task" type="string">
+            <validation name="required" />
+        </field>
+        <field name="dateAdded" type="datetime" />
+    </model>
+    
+    <model name="DbudServer" modelClass="dbud\model\ServerModel" dataClass="dbud\model\data\ServerData" log="true">
+        <field name="environment" model="DbudEnvironment" relation="belongsTo" />
+        <field name="name" type="string">
+            <validation name="required" />
+        </field>
+        <field name="repositoryPath" type="string" default="/" />
+        <field name="revision" type="string" />
+        <field name="protocol" type="string">
+            <validation name="required" />
+        </field>
+        <field name="remoteHost" type="string">
+            <validation name="required" />
+        </field>
+        <field name="remotePort" type="string">
+            <validation name="numeric" />
+        </field>
+        <field name="remotePath" type="string" />
+        <field name="remoteUsername" type="string">
+            <validation name="required" />
+        </field>
+        <field name="remotePassword" type="string" />
+        <field name="useKey" type="boolean" />
+        <field name="usePassive" type="boolean" />
+        <field name="useSsl" type="boolean" />
+        <field name="exclude" type="text" />
+        <field name="commands" type="text" />
+        <field name="slug" type="string">
+            <validation name="required" />
+        </field>
+
+        <format name="title">{name}</format>
+    </model>
+    
+    <model name="DbudLog" modelClass="dbud\model\LogModel" dataClass="dbud\model\data\LogData">
+        <field name="project" model="DbudProject" relation="belongsTo" />
+        <field name="message" type="text">
+            <validation name="required" />
+        </field>
+        <field name="dateAdded" type="datetime" />
+    </model>
+</models>
