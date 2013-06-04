@@ -2,8 +2,12 @@
 
 {block name="content" append}
 
+    {if !$projects}
+    <p>{translate key="dbud.label.projects.none"}</p>
+    {/if}
     <p><a href="{url id="dbud.project.add"}" class="btn">{translate key="dbud.button.project.add"}</a></p>
     
+    {if $projects}
     <table class="table table-striped">
         <thead>
             <tr>
@@ -22,5 +26,6 @@
     {/foreach}
         </tbody>
     </table>
+    {/if}
 
 {/block}

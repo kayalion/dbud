@@ -30,6 +30,11 @@
     
     <div class="servers">
         <h3>{translate key="dbud.title.server.overview"}</h3>
+        
+        {if !$servers}
+        <p>{translate key="dbud.label.servers.none"}</p>
+        {/if}
+        
         <p><a href="{url id="dbud.server.add" parameters=["project" => $project->slug, "environment" => $environment->slug]}" class="btn">{translate key="dbud.button.server.add"}</a></p>
         
         {if $servers}

@@ -16,6 +16,9 @@
     
     <div class="environments">
         <h3>{translate key="dbud.title.environment.overview"}</h3>
+        {if !$environments}
+        <p>{translate key="dbud.label.environments.none"}</p>
+        {/if}
         <p><a href="{url id="dbud.environment.add" parameters=["project" => $project->slug]}" class="btn{if $project->state != "cloned"} disabled{/if}">{translate key="dbud.button.environment.add"}</a></p>
         
         {if $environments}

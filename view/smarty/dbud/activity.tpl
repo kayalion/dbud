@@ -1,6 +1,7 @@
 {extends file="app/index"}
 
 {block name="content" append}
+    {if $logs}
     <table class="table table-striped">
         <thead>
             <tr>
@@ -19,4 +20,7 @@
         {/foreach}
         </tbody>
     </table>
+    {else}
+    <p>{translate key="dbud.label.activity.none"}</p>
+    {/if}
 {/block}
