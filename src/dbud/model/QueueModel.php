@@ -99,6 +99,8 @@ class QueueModel extends GenericModel {
 
         $queue = $query->query();
         foreach ($queue as $id => $queueJob) {
+            $queueJob->job = $queueModel->getQueueJob($queueJob->job);
+
             if (!$queueJob->job) {
                 $this->delete($queueJob);
 
@@ -106,8 +108,6 @@ class QueueModel extends GenericModel {
 
                 continue;
             }
-
-            $queueJob->status = $queueModel->getJobStatus($queueJob->job);
         }
 
         return $queue;
@@ -135,6 +135,8 @@ class QueueModel extends GenericModel {
 
         $queue = $query->query();
         foreach ($queue as $id => $queueJob) {
+            $queueJob->job = $queueModel->getQueueJob($queueJob->job);
+
             if (!$queueJob->job) {
                 $this->delete($queueJob);
 
@@ -142,8 +144,6 @@ class QueueModel extends GenericModel {
 
                 continue;
             }
-
-            $queueJob->status = $queueModel->getJobStatus($queueJob->job);
         }
 
         return $queue;
