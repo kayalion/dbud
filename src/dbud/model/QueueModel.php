@@ -7,6 +7,7 @@ use dbud\model\job\ServerDeployJob;
 
 use zibo\library\orm\model\behaviour\DatedBehaviour;
 use zibo\library\orm\model\GenericModel;
+use zibo\library\queue\model\QueueJob;
 
 /**
  * Queue model
@@ -28,15 +29,27 @@ class QueueModel extends GenericModel {
     }
 
     /**
+     * Queues a job
+     * @param zibo\library\queue\QueueJob $queueJob
+     * @return id Id of the job
+     */
+    protected function queue(QueueJob $queueJob) {
+        $zibo = $this->orm->getZibo();
+        $dispatcher = $zibo->getDependency('zibo\\library\\queue\\model\\dispatcher\\QueueDispatcher', 'dbud');
+
+        return $dispatcher->queue($queueJob);
+    }
+
+    /**
      * Queues a clone
      * @param ProjectData $project
      * @return null
      */
     public function queueClone($project) {
-        $job = new ProjectCloneJob('dbud');
+        $job = new ProjectCloneJob();
         $job->setProject($project);
 
-        $jobId = $this->orm->getQueueModel()->pushJobToQueue($job);
+        $jobId = $this->queue($job);
 
         $queue = $this->createData();
         $queue->task = 'Clone ' . $project->repository;
@@ -55,12 +68,12 @@ class QueueModel extends GenericModel {
      * @return null
      */
     public function queueDeploy($project, $environment, $server) {
-        $job = new ServerDeployJob('dbud');
+        $job = new ServerDeployJob();
         $job->setProject($project);
         $job->setEnvironment($environment);
         $job->setServer($server);
 
-        $jobId = $this->orm->getQueueModel()->pushJobToQueue($job);
+        $jobId = $this->queue($job);
 
         $queue = $this->createData();
         $queue->task = 'Deploy ' . $environment->branch . ' to ' . $server->getDsn();

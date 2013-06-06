@@ -14,10 +14,9 @@
                 <tr>
                     <th>{translate key="dbud.label.date"}</th>
                     <th>{translate key="dbud.label.task"}</th>
+                    <th>{translate key="dbud.label.state"}</th>
                     <th>{translate key="dbud.label.queue"}</th>
                     <th>{translate key="dbud.label.slot"}</th>
-                    <th>{translate key="dbud.label.state"}</th>
-                    <th>{translate key="dbud.label.error"}</th>
                 </tr>
             </thead>
             <tbody>        
@@ -25,8 +24,8 @@
                 <tr>
                     <td>{$job->dateAdded|date_format:"Y-m-d H:i:s"}</td>
                     <td>{$job->task}</td>
-                    <td>{$job->status->getQueue()}</td>
                     <td>{if $job->status->isInProgress()}<span class="label label-warning">{translate key="dbud.state.progress"}{elseif $job->status->isError()}<span class="label label-important">{translate key="dbud.state.error"}{else}<span class="label label-info">{translate key="dbud.state.queue"}{/if}</span></td>
+                    <td>{$job->status->getQueue()}</td>
                     <td>{if $job->status->isError() || $job->status->isInProgress()}---{else}{$job->status->getSlot()} / {$job->status->getTotalSlots()}{/if}</td>
                 {if $job->status->getError()}
                 </tr>

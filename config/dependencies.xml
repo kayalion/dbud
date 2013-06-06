@@ -2,6 +2,20 @@
 <container>
     <dependency class="dbud\Module" />
     
+    <dependency interface="zibo\library\queue\model\dispatcher\QueueDispatcher" class="zibo\library\queue\model\dispatcher\RoundRobinQueueDispatcher" id="dbud">
+        <call method="__construct">
+            <argument name="queues" type="parameter">
+                <property name="key" value="dbud.queue" />
+            </argument>
+        </call>
+        <call method="setQueueModel">
+            <argument name="queueModel" type="call">
+                <property name="interface" value="zibo\library\orm\OrmManager" />
+                <property name="method" value="getQueueModel" />
+            </argument>
+        </call>
+    </dependency>
+    
     <dependency interface="dbud\model\protocol\Protocol" class="dbud\model\protocol\SftpProtocol" id="sftp">
         <call method="setZibo">
             <argument name="zibo" type="dependency">
