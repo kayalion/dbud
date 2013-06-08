@@ -19,6 +19,7 @@
         "zibo/jquery": "*",
         "zibo/queue": "*",
         "zibo/security": "*",
+        "zibo/ssh": "*",
         "zibo/template": "*",
         "zibo/template.smarty": "*",
         "zibo/validation": "*"
