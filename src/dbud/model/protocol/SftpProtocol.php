@@ -54,14 +54,14 @@ class SftpProtocol extends AbstractSshProtocol {
     public function processForm(ServerData $server) {
         $this->connect($server);
 
-        if (!$this->fileExists($server->remotePath)) {
+        if (!$this->ssh->fileExists($server->remotePath)) {
             $exception = new ValidationException();
             $exception->addError('remotePath', new ValidationError('error.remote.path.exists', 'Remote path does not exist'));
 
             throw $exception;
         }
 
-        $this->disconnect();
+        $this->ssh->disconnect();
     }
 
     /**
@@ -90,12 +90,11 @@ class SftpProtocol extends AbstractSshProtocol {
 
             switch ($file->action) {
                 case 'delete':
-                    $log['-' . $file->path] = $this->deleteFile($remoteFile);;
+                    $log['-' . $file->path] = $this->ssh->deleteFile($remoteFile);;
 
                     break;
                 case 'create':
-                    $log['+' . $file->path] = $this->copyFile($localPath . $file->path, $remoteFile, $file->mode);
-//                     $log['#' . $file->path . ':' . $file->mode] = $this->chmod($remoteFile, $file->mode);
+                    $log['+' . $file->path] = $this->ssh->uploadFile($localPath . $file->path, $remoteFile, $file->mode);
 
                     break;
             }
@@ -103,10 +102,10 @@ class SftpProtocol extends AbstractSshProtocol {
 
         $commands = $server->parseCommands();
         foreach ($commands as $command) {
-            $log['@' . $command] = $this->execute($command);
+            $log['@' . $command] = $this->ssh->execute($command);
         }
 
-        $this->disconnect();
+        $this->ssh->disconnect();
 
         return $log;
     }

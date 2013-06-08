@@ -47,7 +47,7 @@ class SshProtocol extends AbstractSshProtocol {
      */
     public function processForm(ServerData $server) {
         $this->connect($server);
-        $this->disconnect();
+        $this->ssh->disconnect();
     }
 
     /**
@@ -67,9 +67,9 @@ class SshProtocol extends AbstractSshProtocol {
         $commands = $server->parseCommands();
         $command = implode("; ", $commands);
 
-        $log['@' . $command] = $this->execute($command);
+        $log['@' . $command] = $this->ssh->execute($command);
 
-        $this->disconnect();
+        $this->ssh->disconnect();
 
         return $log;
     }

@@ -27,6 +27,11 @@
                 <property name="interface" value="zibo\library\security\SecurityManager" />
             </argument>
         </call>
+        <call method="setSshClient">
+            <argument name="sshClient" type="dependency">
+                <property name="interface" value="zibo\library\ssh\SshClient" />
+            </argument>
+        </call>
         <call method="setPublicKeyFile">
             <argument name="publicKeyFile" type="parameter">
                 <property name="key" value="dbud.ssh.key.public" />
@@ -68,6 +73,11 @@
                 <property name="interface" value="zibo\library\security\SecurityManager" />
             </argument>
         </call>
+        <call method="setSshClient">
+            <argument name="sshClient" type="dependency">
+                <property name="interface" value="zibo\library\ssh\SshClient" />
+            </argument>
+        </call>        
         <call method="setPublicKeyFile">
             <argument name="publicKeyFile" type="parameter">
                 <property name="key" value="dbud.ssh.key.public" />
