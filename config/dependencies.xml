@@ -1,6 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <container>
+    <dependency interface="dbud\model\job\environment\BuilderEnvironment" class="dbud\model\job\environment\LocalBuilderEnvironment" id="local" />    
+    
+    <dependency interface="dbud\model\job\environment\BuilderEnvironment" class="dbud\model\job\environment\VirtualBoxBuilderEnvironment" id="virtualbox">
+        <call method="setVirtualMachineName">
+            <argument name="name" type="parameter">
+                <property name="key" value="dbud.virtualbox.name" />
+                <property name="default" value="dbud-worker" />
+            </argument>
+        </call>
+        <call method="setVirtualMachineBootTime">
+            <argument name="bootTime" type="parameter">
+                <property name="key" value="dbud.virtualbox.boottime" />
+                <property name="default" value="20" />
+            </argument>
+        </call>
+        <call method="setVirtualMachineUsername">
+            <argument name="username" type="parameter">
+                <property name="key" value="dbud.virtualbox.username" />
+                <property name="default" value="dbud" />
+            </argument>
+        </call>
+        <call method="setVirtualMachinePassword">
+            <argument name="password" type="parameter">
+                <property name="key" value="dbud.virtualbox.password" />
+                <property name="default" value="dubd" />
+            </argument>
+        </call>
+    </dependency>    
+
     <dependency class="dbud\Module" />
+    
+    <dependency interface="zibo\core\console\command\Command" class="dbud\console\RepositoryUpdateCommand" id="repository.update" />
     
     <dependency interface="zibo\library\queue\model\dispatcher\QueueDispatcher" class="zibo\library\queue\model\dispatcher\RoundRobinQueueDispatcher" id="dbud">
         <call method="__construct">

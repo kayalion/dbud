@@ -14,6 +14,7 @@
         "zibo/core": "*",
         "zibo/form": "*",
         "zibo/ftp": "*",
+        "zibo/git": "*",
         "zibo/i18n": "*",
         "zibo/i18n.en": "*",
         "zibo/jquery": "*",

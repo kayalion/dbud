@@ -17,6 +17,18 @@ class ServerModel extends GenericModel {
     const NAME = 'DbudServer';
 
     /**
+     * Mode for manual deployment
+     * @var string
+     */
+    const MODE_MANUAL = 'manual';
+
+    /**
+     * Mode for automatic deployment
+     * @var string
+     */
+    const MODE_AUTOMATIC = 'auto';
+
+    /**
      * Initialize this model
      * @return null
      */
@@ -25,21 +37,26 @@ class ServerModel extends GenericModel {
     }
 
     /**
-     * Gets the servers of a environment
+     * Gets the servers of a repository
      * @return array
      */
-    public function getServersForEnvironment($environmentId) {
+    public function getServersForRepository($repositoryId, $branch = null) {
         $query = $this->createQuery();
-        $query->addCondition('{environment} = %1%', $environmentId);
+        $query->addCondition('{repository} = %1%', $repositoryId);
+
+        if ($branch) {
+            $query->addCondition('{branch} = %1%', $branch);
+        }
+
         $query->addOrderBy('{name} ASC');
 
         return $query->query();
     }
 
     /**
-     * Gets a environment by its slug
+     * Gets a server by its slug
      * @param string $slug
-     * @return null|dbud\model\data\EnvironmentData
+     * @return null|dbud\model\data\ServerData
      */
     public function getServerBySlug($slug) {
         $query = $this->createQuery();

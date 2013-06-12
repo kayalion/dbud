@@ -2,7 +2,9 @@
 
 namespace dbud\controller;
 
-use zibo\app\controller\AbstractController;
+use dbud\model\RepositoryModel;
+use dbud\model\ServerModel;
+
 use zibo\app\view\BaseView;
 use zibo\app\view\FormView;
 
@@ -16,78 +18,27 @@ use zibo\library\validation\exception\ValidationException;
 class ServerController extends AbstractController {
 
     /**
-     * Action to show the detail of a server
-     * @param OrmManager $orm
-     * @param string $project
-     * @param string $environment
-     * @param string $slug
-     * @return null
-     */
-    public function detailAction(OrmManager $orm, $project, $environment, $slug) {
-        $projectModel = $orm->getDbudProjectModel();
-        $project = $projectModel->getProjectBySlug($project);
-        if (!$project) {
-            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
-
-            return;
-        }
-
-        $environmentModel = $orm->getDbudEnvironmentModel();
-        $environment = $environmentModel->getEnvironmentBySlug($environment);
-        if (!$environment || $environment->project != $project->id) {
-            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
-
-            return;
-        }
-
-        $serverModel = $orm->getDbudServerModel();
-        $server = $serverModel->getServerBySlug($slug);
-        if (!$server || $server->environment != $environment->id) {
-            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
-
-            return;
-        }
-
-        $translator = $this->getTranslator();
-
-        $view = new BaseView('dbud/server.detail');
-        $view->setPageTitle($translator->translate('dbud.title.server.detail'));
-        $view->setPageSubTitle($server->name);
-        $view->set('project', $project);
-        $view->set('environment', $environment);
-        $view->set('server', $server);
-
-        $this->response->setView($view);
-    }
-
-    /**
      * Action to add or edit a project
      * @param OrmManager $orm
-     * @param string $slug
+     * @param string $repository
+     * @param string $branch
+     * @param string $server
      * @return null
      */
-    public function formAction(OrmManager $orm, $project, $environment, $slug = null) {
-        $projectModel = $orm->getDbudProjectModel();
-        $project = $projectModel->getProjectBySlug($project);
-        if (!$project) {
-            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
-
-            return;
-        }
-
-        $environmentModel = $orm->getDbudEnvironmentModel();
-        $environment = $environmentModel->getEnvironmentBySlug($environment);
-        if (!$environment || $environment->project != $project->id) {
+    public function formAction(OrmManager $orm, $repository, $branch, $server = null) {
+        $repositoryModel = $orm->getDbudRepositoryModel();
+        $repository = $repositoryModel->getRepositoryBySlug($repository);
+        if (!$repository) {
             $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
             return;
         }
 
         $serverModel = $orm->getDbudServerModel();
-        if ($slug) {
-            $server = $serverModel->getServerBySlug($slug);
+        if ($server) {
+            $server = $serverModel->getServerBySlug($server);
 
-            if (!$server || $server->environment != $environment->id) {
+            if (!$server || $server->repository != $repository->id || $server->branch != $branch) {
                 $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
                 return;
@@ -119,10 +70,21 @@ class ServerController extends AbstractController {
 
         $formBuilder = $this->createFormBuilder($server);
         $formBuilder->addRow('name', 'string', array(
-            'label' => $translator->translate('dbud.label.server'),
+            'label' => $translator->translate('dbud.label.name'),
             'description' => $translator->translate('dbud.label.server.description'),
             'filters' => array(
                 'trim' => array(),
+            ),
+            'validators' => array(
+                'required' => array(),
+            ),
+        ));
+        $formBuilder->addRow('mode', 'select', array(
+            'label' => $translator->translate('dbud.label.mode'),
+            'description' => $translator->translate('dbud.label.mode.description'),
+            'options' => array(
+                ServerModel::MODE_MANUAL => $translator->translate('dbud.mode.' . ServerModel::MODE_MANUAL),
+                ServerModel::MODE_AUTOMATIC => $translator->translate('dbud.mode.' . ServerModel::MODE_AUTOMATIC),
             ),
             'validators' => array(
                 'required' => array(),
@@ -147,11 +109,7 @@ class ServerController extends AbstractController {
         $form = $formBuilder->build($this->request);
         if ($form->isSubmitted()) {
             if ($this->request->getBodyParameter('cancel')) {
-                if ($slug) {
-                    $this->response->setRedirect($this->getUrl('dbud.server.detail', array('project' => $project->slug, 'environment' => $environment->slug, 'slug' => $slug)));
-                } else {
-                    $this->response->setRedirect($this->getUrl('dbud.environment.detail', array('project' => $project->slug, 'slug' => $environment->slug)));
-                }
+                $this->response->setRedirect($this->getUrl('dbud.repository.deployment', array('repository' => $repository->slug, 'branch' => $branch)));
 
                 return;
             }
@@ -161,7 +119,8 @@ class ServerController extends AbstractController {
 
                 $data = $form->getData();
                 if ($protocol) {
-                    $data->environment = $environment->id;
+                    $data->repository = $repository->id;
+                    $data->branch = $branch;
 
                     if ($data->newPassword) {
                         $securityManager = $this->getSecurityManager();
@@ -172,7 +131,7 @@ class ServerController extends AbstractController {
 
                     $serverModel->save($data);
 
-                    $this->response->setRedirect($this->getUrl('dbud.server.detail', array('project' => $project->slug, 'environment' => $environment->slug, 'slug' => $data->slug)));
+                    $this->response->setRedirect($this->getUrl('dbud.repository.deployment', array('repository' => $repository->slug, 'branch' => $branch)));
 
                     return;
                 } elseif (isset($protocols[$data->protocol])) {
@@ -196,14 +155,17 @@ class ServerController extends AbstractController {
             }
         }
 
-        if ($slug) {
-            $formAction = $this->getUrl('dbud.server.edit.submit', array('project' => $project->slug, 'environment' => $environment->slug, 'slug' => $slug));
+        if ($server->id) {
+            $formAction = $this->getUrl('dbud.server.edit.submit', array('repository' => $repository->slug, 'branch' => $branch, 'server' => $server->slug));
         } else {
-            $formAction = $this->getUrl('dbud.server.add.submit', array('project' => $project->slug, 'environment' => $environment->slug));
+            $formAction = $this->getUrl('dbud.server.add.submit', array('repository' => $repository->slug, 'branch' => $branch));
         }
 
         $module = $this->zibo->getDependency('dbud\Module');
         $publicKey = $module->getPublicKey($this->zibo);
+
+        $git = $repositoryModel->getGitRepository($repository, $branch);
+        $branches = $git->getBranches();
 
         if ($server->protocol) {
             $template = 'dbud/server.form.' . $server->protocol;
@@ -212,14 +174,14 @@ class ServerController extends AbstractController {
         }
 
         $view = new FormView($form->getFormView(), $formAction, $template);
+        $view->setPageTitle($translator->translate('dbud.title.repository.detail'));
+        $view->setPageSubTitle($repository->name);
+        $view->addStyle('css/dbud.css');
+        $view->set('repository', $repository);
+        $view->set('branches', $branches);
+        $view->set('branch', $branch);
+        $view->set('server', $server);
         $view->set('publicKey', $publicKey);
-
-        if ($slug) {
-            $view->setPageTitle($translator->translate('dbud.title.server.edit'));
-            $view->setPageSubTitle($server->name);
-        } else {
-            $view->setPageTitle($translator->translate('dbud.title.server.add'));
-        }
 
         $this->response->setView($view);
     }
@@ -227,38 +189,47 @@ class ServerController extends AbstractController {
     /**
      * Action to delete a server
      * @param OrmManager $orm
-     * @param string $project
-     * @param string $slug
+     * @param string $repository
+     * @param string $branch
+     * @param string $server
      * @return null
      */
-    public function deleteAction(OrmManager $orm, $project, $environment, $slug) {
-        $projectModel = $orm->getDbudProjectModel();
-        $project = $projectModel->getProjectBySlug($project);
-        if (!$project) {
-            $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
-
-            return;
-        }
-
-        $environmentModel = $orm->getDbudEnvironmentModel();
-        $environment = $environmentModel->getEnvironmentBySlug($environment);
-        if (!$environment || $environment->project != $project->id) {
+    public function deleteAction(OrmManager $orm, $repository, $branch, $server) {
+        $repositoryModel = $orm->getDbudRepositoryModel();
+        $repository = $repositoryModel->getRepositoryBySlug($repository);
+        if (!$repository) {
             $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
             return;
         }
 
         $serverModel = $orm->getDbudServerModel();
-        $server = $serverModel->getServerBySlug($slug);
-        if (!$server || $server->environment != $environment->id) {
+        $server = $serverModel->getServerBySlug($server);
+        if (!$server || $server->repository != $repository->id || $server->branch != $branch) {
             $this->response->setStatusCode(Response::STATUS_CODE_NOT_FOUND);
 
             return;
         }
 
-        $serverModel->delete($server);
+        if ($this->request->isPost()) {
+            if ($this->request->getBodyParameter('cancel')) {
+                $this->response->setRedirect($this->getUrl('dbud.repository.deployment', array('repository' => $repository->slug, 'branch' => $branch)));
 
-        $this->response->setRedirect($this->getUrl('dbud.environment.detail', array('project' => $project->slug, 'slug' => $environment->slug)));
+                return;
+            }
+
+            $serverModel->delete($server);
+
+            $this->response->setRedirect($this->getUrl('dbud.repository.deployment', array('repository' => $repository->slug, 'branch' => $branch)));
+
+            return;
+        }
+
+        $view = $this->createView('dbud/server.delete', 'dbud.title.repository.detail', $repository);
+        $view->set('branch', $branch);
+        $view->set('server', $server);
+
+        $this->response->setView($view);
     }
 
 }

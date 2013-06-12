@@ -3,6 +3,7 @@
 namespace dbud\model\protocol;
 
 use dbud\model\data\ServerData;
+use dbud\model\exception\DeployException;
 
 use zibo\library\filesystem\File;
 use zibo\library\form\FormBuilder;
@@ -22,7 +23,7 @@ class SftpProtocol extends AbstractSshProtocol {
      * @return null
      */
     public function createForm(FormBuilder $formBuilder, Translator $translator) {
-        $this->createRepositoryRows($formBuilder, $translator, true, true);
+        $this->createRepositoryRows($formBuilder, $translator, true);
         $this->createServerRows($formBuilder, $translator, 22, true, true, false, false);
 
         $formBuilder->addRow('exclude', 'text', array(
@@ -40,6 +41,7 @@ class SftpProtocol extends AbstractSshProtocol {
                 'trim' => array('trim.lines' => true, 'trim.empty' => true),
             ),
             'attributes' => array(
+                'class' => 'console',
                 'rows' => 5,
             ),
         ));
@@ -85,24 +87,54 @@ class SftpProtocol extends AbstractSshProtocol {
         $localPath = $path->getAbsolutePath() . '/';
         $remotePath = rtrim($server->remotePath, '/') . '/';
 
-        foreach ($files as $file) {
-            $remoteFile = $remotePath . $file->path;
+        foreach ($files as $file => $action) {
+            $remoteFile = $remotePath . $file;
 
-            switch ($file->action) {
-                case 'delete':
-                    $log['-' . $file->path] = $this->ssh->deleteFile($remoteFile);;
+            if ($action == 'D') {
+                if ($this->ssh->deleteFile($remoteFile) === false) {
+                    $log['-' . $file] = 'Could not delete ' . $remoteFile;
 
-                    break;
-                case 'create':
-                    $log['+' . $file->path] = $this->ssh->uploadFile($localPath . $file->path, $remoteFile, $file->mode);
+                    $this->ssh->disconnect();
 
-                    break;
+                    $exception = new DeployException();
+                    $exception->setLog($log);
+
+                    throw $exception;
+                }
+
+                $log['-' . $file] = true;
+            } else {
+                $localFile = new File($localPath, $file);
+
+                if ($this->ssh->uploadFile($localPath . $file, $remoteFile, $localFile->getPermissions()) === false) {
+                    $log['+' . $file] = 'Could not upload ' . $file;
+
+                    $this->ssh->disconnect();
+
+                    $exception = new DeployException();
+                    $exception->setLog($log);
+
+                    throw $exception;
+                }
+
+                $log['+' . $file] = true;
             }
         }
 
         $commands = $server->parseCommands();
         foreach ($commands as $command) {
-            $log['@' . $command] = $this->ssh->execute($command);
+            try {
+                $log[$command] = $this->ssh->execute($command);
+            } catch (RuntimeSshException $e) {
+                $log[$command] = $e->getMessage();
+
+                $this->ssh->disconnect();
+
+                $exception = new DeployException();
+                $exception->setLog($log);
+
+                throw $exception;
+            }
         }
 
         $this->ssh->disconnect();

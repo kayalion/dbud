@@ -48,25 +48,30 @@ abstract class AbstractProtocol implements Protocol {
      * @param zibo\library\i18n\translation\Translator $translator
      * @return null
      */
-    protected function createRepositoryRows(FormBuilder $formBuilder, Translator $translator) {
-        $formBuilder->addRow('repositoryPath', 'string', array(
-            'label' => $translator->translate('dbud.label.path.repository'),
-            'description' => $translator->translate('dbud.label.path.repository.description'),
-            'filters' => array(
-                'trim' => array(),
-            ),
-            'validators' => array(
-                'required' => array(),
-            ),
-        ));
-
+    protected function createRepositoryRows(FormBuilder $formBuilder, Translator $translator, $addRepositoryPath) {
         $formBuilder->addRow('revision', 'string', array(
             'label' => $translator->translate('dbud.label.revision'),
             'description' => $translator->translate('dbud.label.revision.description'),
+            'attributes' => array(
+                'class' => 'input-xxlarge',
+            ),
             'filters' => array(
                 'trim' => array(),
             ),
         ));
+
+        if ($addRepositoryPath) {
+            $formBuilder->addRow('repositoryPath', 'string', array(
+                'label' => $translator->translate('dbud.label.path.repository'),
+                'description' => $translator->translate('dbud.label.path.repository.description'),
+                'filters' => array(
+                    'trim' => array(),
+                ),
+                'validators' => array(
+                    'required' => array(),
+                ),
+            ));
+        }
     }
 
     /**
@@ -105,6 +110,9 @@ abstract class AbstractProtocol implements Protocol {
             $formBuilder->addRow('remotePath', 'string', array(
                 'label' => $translator->translate('dbud.label.path.remote'),
                 'description' => $translator->translate('dbud.label.path.remote.description'),
+                'attributes' => array(
+                    'class' => 'input-xxlarge',
+                ),
                 'filters' => array(
                     'trim' => array(),
                 ),

@@ -27,3 +27,5 @@ A queue requires a worker to be handle the queued jobs.
 You can start the queue worker for D-Buddy with the following command:    
     
     php application/console.php queue worker dbud <sleep-time-in-seconds>
+    
+_Note: You can use the src/worker.sh script from the zibo.queue module_

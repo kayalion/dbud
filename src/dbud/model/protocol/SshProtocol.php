@@ -3,10 +3,12 @@
 namespace dbud\model\protocol;
 
 use dbud\model\data\ServerData;
+use dbud\model\exception\DeployException;
 
 use zibo\library\filesystem\File;
 use zibo\library\form\FormBuilder;
 use zibo\library\i18n\translation\Translator;
+use zibo\library\ssh\exception\RuntimeSshException;
 use zibo\library\validation\exception\ValidationException;
 use zibo\library\validation\ValidationError;
 
@@ -22,6 +24,7 @@ class SshProtocol extends AbstractSshProtocol {
      * @return null
      */
     public function createForm(FormBuilder $formBuilder, Translator $translator) {
+        $this->createRepositoryRows($formBuilder, $translator, false);
         $this->createServerRows($formBuilder, $translator, 22, false, true, false, false);
 
         $formBuilder->addRow('commands', 'text', array(
@@ -34,6 +37,7 @@ class SshProtocol extends AbstractSshProtocol {
                 'required' => array(),
             ),
             'attributes' => array(
+                'class' => 'console',
                 'rows' => 10,
             ),
         ));
@@ -47,6 +51,7 @@ class SshProtocol extends AbstractSshProtocol {
      */
     public function processForm(ServerData $server) {
         $this->connect($server);
+
         $this->ssh->disconnect();
     }
 
@@ -62,12 +67,23 @@ class SshProtocol extends AbstractSshProtocol {
     public function deploy(ServerData $server, File $path, array $files) {
         $log = array();
 
+        $commands = $server->parseCommands();
+        $command = implode(" && ", $commands);
+
         $this->connect($server);
 
-        $commands = $server->parseCommands();
-        $command = implode("; ", $commands);
+        try {
+            $log[$command] = $this->ssh->execute($command);
+        } catch (RuntimeSshException $e) {
+            $log[$command] = $e->getMessage();
 
-        $log['@' . $command] = $this->ssh->execute($command);
+            $this->ssh->disconnect();
+
+            $exception = new DeployException();
+            $exception->setLog($log);
+
+            throw $exception;
+        }
 
         $this->ssh->disconnect();
 

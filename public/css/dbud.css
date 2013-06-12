@@ -1,0 +1,22 @@
+body .console {
+	background-color: #222;
+	color: #f3f3f3;
+	font-family: monospace;
+	padding: 5px;
+}
+
+body .label-ok {
+    background-color: #468847;
+}
+
+body .label-error {
+    background-color: #b94a48;
+}
+
+body .label-manual {
+	background-color: #c3325f;
+}
+
+body .label-auto {
+	background-color: #7a43b6;
+}

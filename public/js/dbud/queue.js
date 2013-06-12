@@ -6,6 +6,6 @@ function initializeQueue(url, delay) {
 	);
 
 	function refreshQueue() {
-		$('#queue').load(url + ' #queue-inner');
+		$('#activity').load(url + ' #activity-inner');
 	}
 }

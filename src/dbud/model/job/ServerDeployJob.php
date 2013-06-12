@@ -2,11 +2,13 @@
 
 namespace dbud\model\job;
 
-use dbud\model\data\ProjectData;
-use dbud\model\data\EnvironmentData;
 use dbud\model\data\ServerData;
+use dbud\model\RepositoryModel;
+
+use dbud\Module;
 
 use zibo\library\filesystem\File;
+use zibo\library\Timer;
 
 use zibo\queue\model\AbstractZiboQueueJob;
 
@@ -18,38 +20,10 @@ use \Exception;
 class ServerDeployJob extends AbstractZiboQueueJob {
 
     /**
-     * Project to deploy
-     * @var dbud\model\data\ProjectData
-     */
-    protected $project;
-
-    /**
-     * Environment to deploy
-     * @var dbud\model\data\EnvironmentData
-     */
-    protected $environment;
-
-    /**
      * Server to deploy to
      * @var dbud\model\data\ServerData
      */
     protected $server;
-
-    /**
-     * Sets the project to the job
-     * @param ProjectData $project
-     */
-    public function setProject(ProjectData $project) {
-        $this->project = $project;
-    }
-
-    /**
-     * Sets the environment to the job
-     * @param EnvironmentData $environment
-     */
-    public function setEnvironment(EnvironmentData $environment) {
-        $this->environment= $environment;
-    }
 
     /**
      * Sets the server to the job
@@ -66,122 +40,143 @@ class ServerDeployJob extends AbstractZiboQueueJob {
      */
     public function run() {
         $orm = $this->zibo->getDependency('zibo\\library\\orm\\OrmManager');
-        $projectModel = $orm->getDbudProjectModel();
 
-        $repositoryPath = $projectModel->getRepositoryPath($this->project, $this->environment->branch);
-        if ($repositoryPath->exists()) {
-            $repositoryPath->delete();
+        $activityModel = $orm->getDbudActivityModel();
+        $repositoryModel = $orm->getDbudRepositoryModel();
+        $serverModel = $orm->getDbudServerModel();
+
+        $repository = $repositoryModel->getById($this->server->repository->id, 0);
+        if ($repository->state != Module::STATE_READY) {
+            throw new Exception('Repository is not ready');
         }
 
-        // pull branch
-        $projectModel->pullBranch($this->project, $this->environment->branch);
+        $activityModel->logActivity($this->server->repository->id, 'Deploying ' . $this->server->branch . ' to ' . $this->server->name, 'DbudServer', $this->server->id, $this->getJobId());
 
-        // check revision / files to copy and remove
-        try {
-            $files = array();
-            $revision = null;
+        $timer = new Timer();
 
-            $logs = $projectModel->getCommitLogs($this->project, $this->environment->branch, $this->server->revision);
-            foreach ($logs as $log) {
-                if (!$revision) {
-                    $revision = $log->id;
-                }
+        $this->server->state = Module::STATE_WORKING;
+        $serverModel->save($this->server, 'state');
 
-                foreach ($log->files as $file) {
-                    if (isset($files[$file->path]) || strpos('/' . $file->path, $this->server->repositoryPath) !== 0) {
+        $files = array();
+
+        $log = 'Deployed ' . $this->server->branch . ' to ' . $this->server->name . "\n\n";
+
+        // check revision
+        $git = $repositoryModel->getGitRepository($repository, $this->server->branch);
+        $revision = $git->getRevision();
+
+        if ($revision) {
+            $log .= "# Commit: " . $revision . "\n# Server: " . $this->server->getDsn() . "\n";
+        } else {
+            $log .= "# No commits in the repository\n";
+        }
+
+        // get changed files
+        if ($revision && $this->server->revision != $revision) {
+            if ($this->server->revision) {
+                $output = $git->git('diff --name-status ' . $this->server->revision);
+                foreach ($output as $file) {
+                    list($action, $path) = explode("\t", $file, 2);
+
+                    if (isset($files[$file]) || strpos('/' . $path, $this->server->repositoryPath) !== 0) {
                         continue;
                     }
 
-                    $files[$file->path] = $file;
-                }
-            }
-
-            if (!$revision) {
-                $revision = $this->server->revision;
-            }
-
-            $message = 'Deployed ' . $revision . ' from ' . $this->environment->branch . ' to ' . $this->server->getDsn() . "\n\n";
-
-            // apply exclude filters
-            $exclude = $this->server->parseExclude();
-            if ($exclude) {
-                foreach ($files as $path => $file) {
-                    $regex = $this->isPathExcluded($path, $exclude);
-                    if ($regex == false) {
-                        continue;
-                    }
-
-                    unset($files[$path]);
-
-                    $message .= 'skipped ' . $path . ' due to exclude rule ' . $regex . "\n";
-                }
-            }
-
-            // perform actions
-            $this->zibo->getLog()->logDebug('Deploying ' . $revision . ' from Environment#' . $this->environment->id . ' to ' . $this->server->getDsn());
-
-            $protocol = $this->zibo->getDependency('dbud\\model\\protocol\\Protocol', $this->server->protocol);
-            $log = $protocol->deploy($this->server, $repositoryPath, $files);
-
-            // log deploy actions
-            if ($log) {
-                foreach ($log as $file => $status) {
-                    $action = substr($file, 0, 1);
-                    switch ($action) {
-                        case '-':
-                            if ($status) {
-                                $message .= 'deleted file ' . substr($file, 1) . "\n";
-                            } else {
-                                $message .= 'could not delete file ' . substr($file, 1) . "\n";
-                            }
-
-                            break;
-                        case '+':
-                            if ($status) {
-                                $message .= 'copied file ' . substr($file, 1) . "\n";
-                            } else {
-                                $message .= 'could not copy file ' . substr($file, 1) . "\n";
-                            }
-
-                            break;
-                        case '@':
-                            $message .= 'executed ' . substr($file, 1) . "\n" . $status  . "\n";
-
-                            break;
-                        case '#':
-                            if (!$status) {
-                                list($path, $mode) = explode(':', $file, 2);
-
-                                $message .= 'could not chmod file ' . $path . ' to ' . $mode . "\n";
-                            }
-
-                            break;
-                    }
+                    $files[$path] = $action;
                 }
             } else {
-                $message .= "already up-to-date";
+                $output = $git->getTree($this->server->branch, null, true);
+                foreach ($output as $path => $null) {
+                    if (strpos('/' . $path, $this->server->repositoryPath) !== 0) {
+                        continue;
+                    }
+
+                    $files[$path] = 'A';
+                }
             }
+        }
 
-            $logModel = $orm->getDbudLogModel();
-            $logModel->logMessage($this->project, $message);
+        // apply exclude filters
+        $exclude = $this->server->parseExclude();
+        if ($exclude) {
+            foreach ($files as $path => $action) {
+                $regex = $this->isPathExcluded($path, $exclude);
+                if ($regex === false) {
+                    continue;
+                }
 
-            // update server
-            if ($revision) {
-                $this->server->revision = $revision;
+                unset($files[$path]);
 
-                $serverModel = $orm->getDbudServerModel();
-                $serverModel->save($this->server, 'revision');
+                $log .= '# [s] ' . $path . ' (' . $regex . ")\n";
             }
+        }
 
-            // clean up
-            $repositoryPath->delete();
-        } catch (Exception $e) {
-            $repositoryPath->delete();
+        // get the protocol
+        $protocol = $this->zibo->getDependency('dbud\\model\\protocol\\Protocol', $this->server->protocol);
 
-            throw $e;
+        // perform actions
+        $this->zibo->getLog()->logDebug('Deploying ' . substr($revision, 0, 7) . ' from ' . $this->server->branch . ' in '. $this->server->repository->repository . ' to ' . $this->server->getDsn());
+
+        try {
+            $output = $protocol->deploy($this->server, $git->getClient()->getWorkingDirectory(), $files);
+
+            $isError = false;
+        } catch (DeployException $exception) {
+            $this->zibo->getLog()->logException($exception);
+
+            $output = $exception->getLog();
+
+            $isError = true;
+        }
+
+        // log deploy actions
+        if ($output) {
+            foreach ($output as $command => $commandOutput) {
+                $log .= $command . "\n";
+
+                if ($commandOutput === true || !$commandOutput) {
+                    continue;
+                }
+
+                if (!is_array($commandOutput)) {
+                    $commandOutput = array($commandOutput);
+                }
+
+                foreach ($commandOutput as $line) {
+                    $log .= "| " . $line;
+                }
+            }
+        }
+
+        // update server
+        $this->server->dateDeployed = time();
+        $serverModel->save($this->server, 'dateDeployed');
+
+        $log .= "# Deployment took " . $timer->getTime() . " seconds.";
+
+        if ($isError) {
+            $this->server->state = Module::STATE_ERROR;
+            $serverModel->save($this->server, 'state');
+
+            $activityModelModel->logError($this->server->repository->id, $log, null, 'DbudServer', $this->server->id, $this->getJobId());
+        } else {
+            $this->server->revision = $revision;
+            $serverModel->save($this->server, 'revision');
+
+            $this->server->state = Module::STATE_OK;
+            $serverModel->save($this->server, 'state');
+
+            $activityModel->logActivity($this->server->repository->id, $log, 'DbudServer', $this->server->id, $this->getJobId());
         }
     }
 
+    /**
+     * Checks if the provided path matches a exclude regex
+     * @param string $path
+     * @param array $exceludes
+     * @return boolean|string False when the path does not match, the regex if
+     * it matches
+     */
     protected function isPathExcluded($path, array $excludes) {
         $pathFile = new File($path);
 

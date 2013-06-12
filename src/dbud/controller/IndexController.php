@@ -2,7 +2,6 @@
 
 namespace dbud\controller;
 
-use zibo\app\controller\AbstractController;
 use zibo\app\view\BaseView;
 
 use zibo\library\filesystem\File;
@@ -15,22 +14,11 @@ use zibo\library\orm\OrmManager;
 class IndexController extends AbstractController {
 
     /**
-     * Action to show the queue of a project
-     * @param OrmManager $orm
-     * @param string $slug
+     * Action to redirect to the start page
      * @return null
      */
-    public function indexAction(OrmManager $orm) {
-        $logModel = $orm->getDbudLogModel();
-        $logs = $logModel->getLogs();
-
-        $translator = $this->getTranslator();
-
-        $view = new BaseView('dbud/activity');
-        $view->setPageTitle($translator->translate('dbud.title.activity'));
-        $view->set('logs', $logs);
-
-        $this->response->setView($view);
+    public function indexAction() {
+        $this->response->setRedirect($this->getUrl('dbud.activity'));
     }
 
     /**
@@ -55,8 +43,7 @@ class IndexController extends AbstractController {
         $publicKey = $publicKeyFile->read();
         $translator = $this->getTranslator();
 
-        $view = new BaseView('dbud/ssh.key');
-        $view->setPageTitle($translator->translate('dbud.title.ssh.key'));
+        $view = $this->createView('dbud/ssh.key', 'dbud.title.ssh.key');
         $view->set('publicKey', $publicKey);
 
         $this->response->setView($view);

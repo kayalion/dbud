@@ -2,7 +2,7 @@
     <thead>
         <tr>
             <th>{translate key="dbud.label.date"}</th>
-            <th>{translate key="dbud.label.task"}</th>
+            <th>{translate key="dbud.label.activity"}</th>
             <th>{translate key="dbud.label.state"}</th>
             <th>{translate key="dbud.label.queue"}</th>
             <th>{translate key="dbud.label.slot"}</th>
@@ -19,7 +19,7 @@
         {if $job->job->description}
         </tr>
         <tr>
-            <td colspan="5"><div class="alert alert-error">{$job->job->description|htmlentities|nl2br}</div></td>
+            <td colspan="5"><div class="alert alert-{if $job->job->status == "error"}error{else}info{/if}">{$job->job->description|htmlentities|nl2br}</div></td>
         {/if}
         </tr> 
     {/foreach}

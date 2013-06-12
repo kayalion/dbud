@@ -10,10 +10,10 @@ use zibo\library\orm\model\data\Data;
 class ServerData extends Data {
 
     /**
-     * Environment of this server
-     * @var null|integer|EnvironmentData
+     * Repository of this server
+     * @var null|integer|RepositoryData
      */
-    public $environment;
+    public $repository;
 
     /**
      * Name of the term
@@ -70,6 +70,18 @@ class ServerData extends Data {
     public $useSsl;
 
     /**
+     * Name of the mode
+     * @var string
+     */
+    public $mode;
+
+    /**
+     * Branch in the repository
+     * @var string
+     */
+    public $branch;
+
+    /**
      * Path in the repository
      * @var string
      */
@@ -80,6 +92,12 @@ class ServerData extends Data {
      * @var string
      */
     public $revision;
+
+    /**
+     * Files to exclude
+     * @var string
+     */
+    public $exclude;
 
     /**
      * Commands to execute
@@ -125,6 +143,14 @@ class ServerData extends Data {
         }
 
         return explode("\n", $this->commands);
+    }
+
+    /**
+     * Gets the revision in a friendly format
+     * @return string
+     */
+    public function getFriendlyRevision() {
+        return substr($this->revision, 0, 7);
     }
 
 }

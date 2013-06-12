@@ -3,6 +3,7 @@
 namespace dbud\model\protocol;
 
 use dbud\model\data\ServerData;
+use dbud\model\exception\DeployException;
 
 use zibo\library\filesystem\File;
 use zibo\library\form\FormBuilder;
@@ -36,7 +37,7 @@ class FtpProtocol extends AbstractProtocol {
      * @return null
      */
     public function createForm(FormBuilder $formBuilder, Translator $translator) {
-        $this->createRepositoryRows($formBuilder, $translator, true, true);
+        $this->createRepositoryRows($formBuilder, $translator, true);
         $this->createServerRows($formBuilder, $translator, 21, true, false, true, true);
 
         $formBuilder->addRow('exclude', 'text', array(
@@ -97,31 +98,42 @@ class FtpProtocol extends AbstractProtocol {
         $localPath = $path->getAbsolutePath() . '/';
         $remotePath = rtrim($server->remotePath, '/') . '/';
 
-        foreach ($files as $file) {
-            $remoteFile = $remotePath . $file->path;
+        foreach ($files as $file => $action) {
+            $remoteFile = $remotePath . $file;
 
-            switch ($file->action) {
-                case 'delete':
-                    try {
-                        $client->deleteFile($remoteFile);
+            if ($action == 'D') {
+                try {
+                    $client->deleteFile($remoteFile);
 
-                        $log['-' . $file->path] = true;
-                    } catch (FtpException $exception) {
-                        $log['-' . $file->path] = false;
-                    }
+                    $log['-' . $file] = true;
+                } catch (FtpException $exception) {
+                    $log['-' . $file] = $exception->getMessage();
 
-                    break;
-                case 'create':
-                    try {
-                        $client->createDirectory(dirname($remoteFile));
-                        $client->put(new File($path, $file->path), $remoteFile);
+                    $client->disconnect();
 
-                        $log['+' . $file->path] = true;
-                    } catch (FtpException $exception) {
-                        $log['+' . $file->path] = false;
-                    }
+                    $exception = new DeployException();
+                    $exception->setLog($log);
 
-                    break;
+                    throw $exception;
+                }
+            } else {
+                try {
+                    $localFile = new File($path, $file);
+
+                    $client->createDirectory(dirname($remoteFile));
+                    $client->put($localFile, $remoteFile, $localFile->getPermissions());
+
+                    $log['+' . $file] = true;
+                } catch (FtpException $exception) {
+                    $log['+' . $file] = $exception->getMessage();
+
+                    $client->disconnect();
+
+                    $exception = new DeployException();
+                    $exception->setLog($log);
+
+                    throw $exception;
+                }
             }
         }
 
