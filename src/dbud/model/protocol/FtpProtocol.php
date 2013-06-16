@@ -121,7 +121,8 @@ class FtpProtocol extends AbstractProtocol {
                     $localFile = new File($path, $file);
 
                     $client->createDirectory(dirname($remoteFile));
-                    $client->put($localFile, $remoteFile, $localFile->getPermissions());
+                    $client->put($localFile, $remoteFile);
+                    $client->chmod($remoteFile, $localFile->getPermissions());
 
                     $log['+' . $file] = true;
                 } catch (FtpException $exception) {

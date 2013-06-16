@@ -2,6 +2,14 @@
 
 namespace dbud\model;
 
+use dbud\model\data\BuilderData;
+use dbud\model\data\FlowData;
+use dbud\model\data\ProjectData;
+use dbud\model\data\ServerData;
+use dbud\model\data\RepositoryData;
+
+use dbud\Module;
+
 use zibo\library\orm\model\GenericModel;
 
 /**
@@ -36,11 +44,11 @@ class FlowModel extends GenericModel {
 
     /**
      * Saves the flow
-     * @param ProjectData $project
+     * @param dbud\model\data\ProjectData $project
      * @param array $data
      * @return null
      */
-    public function saveFlowForProject($project, array $data) {
+    public function saveFlowForProject(ProjectData $project, array $data) {
         $toDelete = $project->flow;
         $toSave = array();
 
@@ -122,6 +130,126 @@ class FlowModel extends GenericModel {
             $this->rollbackTransaction($transactionStarted);
 
             throw $exception;
+        }
+    }
+
+    /**
+     * Sets the project flow in motion
+     * @param dbud\model\data\RepositoryData $repository
+     * @return null
+     */
+    public function onRepositoryUpdate(RepositoryData $repository, array $revisions) {
+        $query = $this->createQuery();
+        $query->setRecursiveDepth(0);
+        $query->addJoin('INNER', 'DbudProjectDbudRepository', 'pr', '{pr.dbudProject} = {project}');
+        $query->addCondition('{pr.dbudRepository} = %1%', $repository->id);
+        $query->addCondition('{previous} IS NULL');
+
+        $flowResult = $query->query();
+        foreach ($flowResult as $flowData) {
+            $this->queueFlow($flowData, $revisions);
+        }
+    }
+
+    /**
+     * Queues the next flow after the provided build
+     * @param dbud\model\data\BuilderData $builder
+     * @return null
+     */
+    public function onBuild(BuilderData $builder) {
+        $query = $this->createQuery();
+        $query->setRecursiveDepth(0);
+        $query->addCondition('{dataType} = %1% AND {dataId} = %2%', 'DbudBuilder', $builder->id);
+
+        $result = $query->query();
+        foreach ($result as $flow) {
+            $query = $this->createQuery();
+            $query->addCondition('{previous} = %1%', $flow->id);
+
+            $flowResult = $query->query();
+            foreach ($flowResult as $flowData) {
+                $this->queueFlow($flowData, $builder->revision);
+            }
+        }
+    }
+
+    /**
+     * Queues the next flow after the provided deploy
+     * @param dbud\model\data\ServerData $server
+     * @return null
+     */
+    public function onDeploy(ServerData $server) {
+        $query = $this->createQuery();
+        $query->setRecursiveDepth(0);
+        $query->addCondition('{dataType} = %1% AND {dataId} = %2%', 'DbudServer', $server->id);
+
+        $result = $query->query();
+        foreach ($result as $flow) {
+            $query = $this->createQuery();
+            $query->addCondition('{previous} = %1%', $flow->id);
+
+            $flowResult = $query->query();
+            foreach ($flowResult as $flowData) {
+                $this->queueFlow($flowData, $server->revision);
+            }
+        }
+    }
+
+    /**
+     * Queues flow data
+     * @param dbud\model\data\FlowData $flow
+     * @return null
+     */
+    protected function queueFlow(FlowData $flow, $revision = null) {
+        $activityModel = $this->orm->getDbudActivityModel();
+
+        switch ($flow->dataType) {
+            case 'DbudBuilder':
+                $builderModel = $this->orm->getDbudBuilderModel();
+
+                $builder = $builderModel->getById($flow->dataId);
+                if (!$builder) {
+                    break;
+                }
+
+                if (is_array($revision)) {
+                    if (isset($revision[$builder->branch])) {
+                        $revision = $revision[$builder->branch];
+                    } else {
+                        $revision = null;
+                    }
+                }
+
+                if ($revision && $builder->revision == $revision && $builder->state == Module::STATE_OK) {
+                    break;
+                }
+
+                $activityModel->queueBuild($builder);
+
+                break;
+            case 'DbudServer':
+                $serverModel = $this->orm->getDbudServerModel();
+
+                $server = $serverModel->getById($flow->dataId);
+                if (!$server) {
+                    break;
+                }
+
+                if (is_array($revision)) {
+                    if (isset($revision[$server->branch])) {
+                        $revision = $revision[$server->branch];
+                    } else {
+                        $revision = null;
+                    }
+                }
+
+                if ($revision && $server->revision == $revision && $server->state == Module::STATE_OK) {
+                    break;
+                }
+
+                $activityModel->queueDeploy($server);
+
+                break;
         }
     }
 

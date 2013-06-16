@@ -107,63 +107,15 @@ class BuilderRunJob extends AbstractZiboQueueJob {
         $this->builder->revision = $revision;
         $builderModel->save($this->builder, 'revision');
 
-        $log .= $this->queueDeployment($orm, $revision);
-
         $this->builder->state = Module::STATE_OK;
         $builderModel->save($this->builder, 'state');
+
+        $flowModel = $orm->getDbudFlowModel();
+        $flowModel->onBuild($this->builder);
 
         $log .= "# Builder took " . $timer->getTime() . " seconds.";
 
         $activityModel->logActivity($repository->id, 'Finished running builder ' . $this->builder->name . ' for ' . $this->builder->branch . "\n\n" . $log, 'DbudBuilder', $this->builder->id, $this->getJobId());
-    }
-
-    /**
-     * Queues the deployment of the repository
-     * @param OrmManager $orm
-     * @param string $revision
-     * @return string Log message
-     */
-    protected function queueDeployment(OrmManager $orm, $revision) {
-        $log = '';
-
-        if ($this->isManual) {
-            return $log;
-        }
-
-        $orm->getQueueModel()->updateStatus($this->getJobId(), 'Queueing deployment');
-
-        $deployAllowed = true;
-
-        $builders = $orm->getDbudBuilderModel()->getBuildersForRepository($this->builder->repository->id, $this->builder->branch);
-        foreach ($builders as $builder) {
-            if ($builder->id == $this->builder->id || ($revision && $builder->revision == $revision && $builder->state == Module::STATE_OK)) {
-                continue;
-            }
-
-            $deployAllowed = false;
-
-            break;
-        }
-
-        if ($deployAllowed) {
-            $activityModel = $orm->getDbudActivityModel();
-            $serverModel = $orm->getDbudServerModel();
-
-            $servers = $serverModel->getServersForRepository($this->builder->repository->id, $this->builder->branch);
-            foreach ($servers as $server) {
-                if ($server->revision == $revision || $server->mode != ServerModel::MODE_AUTOMATIC) {
-                    continue;
-                }
-
-                $server->repository = $this->builder->repository;
-
-                $activityModel->queueDeploy($server);
-
-                $log .= "# Queued deployment from " . $this->builder->branch . " to " . $server->getDsn() . "\n";
-            }
-        }
-
-        return $log;
     }
 
 }

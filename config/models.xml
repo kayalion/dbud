@@ -54,7 +54,6 @@
         <field name="name" type="string">
             <validation name="required" />
         </field>
-        <field name="mode" type="string" />
         <field name="repositoryPath" type="string" default="/" />
         <field name="revision" type="string" />
         <field name="protocol" type="string">

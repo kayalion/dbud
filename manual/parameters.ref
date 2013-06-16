@@ -5,7 +5,8 @@ dbud.queue                  Name or array of names for the available queus
 dbud.ssh.key.public         Path to the public SSH key file of D-Buddy
 dbud.ssh.key.private        Path to the private SSH key file of D-Buddy
 dbud.ssh.key.passphrase     Encrypted passphrase for the private SSH key file of D-Buddy
-dbud.virtualbox.name        Name of the virtual machine
 dbud.virtualbox.boottime    Number of seconds the virtual machine takes to boot
+dbud.virtualbox.clone       Flag to see if the virtual machine should be cloned before boot
+dbud.virtualbox.name        Name of the virtual machine
 dbud.virtualbox.username    Username of the user in the virtual machine
 dbud.virtualbox.password    Password of the user in the virtual machine

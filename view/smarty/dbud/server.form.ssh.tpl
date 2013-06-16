@@ -10,25 +10,23 @@
     {include file="app/form.prototype"}
 
     <form id="{$form->getId()}" class="form-horizontal" action="{$action}" method="POST" enctype="multipart/form-data">
-        <fieldset>                  
+        <fieldset>
             {call formRow form=$form row="name"}
-            
-            {call formRow form=$form row="mode"}
-            
+
             {call formRow form=$form row="revision"}
-            
+
             <h3>{translate key="dbud.label.server"}</h3>
-            
+
             {call formRow form=$form row="protocol"}
-            
+
             {call formRow form=$form row="remoteHost"}
-            
+
             {call formRow form=$form row="remotePort"}
-            
+
             {call formRow form=$form row="remoteUsername"}
-            
+
             {call formRow form=$form row="newPassword"}
-            
+
             <div class="control-group">
                 <label class="control-label"></label>
                 <div class="controls">
@@ -36,7 +34,7 @@
                     <a href="#modal-ssh-key" role="button" data-toggle="modal">{translate key="dbud.button.server.ssh.key"}</a>
                 </div>
             </div>
-            
+
             <div id="modal-ssh-key" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modal-ssh-key-label" aria-hidden="true">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -48,14 +46,14 @@
                         <textarea name="_ssh-key" rows="10" class="span12">{$publicKey}</textarea>
                     </div>
                 </div>
-            </div>                 
-            
+            </div>
+
             <h3>{translate key="dbud.title.commands"}</h3>
-            
+
             {call formRow form=$form row="commands"}
-            
+
             {call formRows form=$form}
-            
+
             <div class="form-actions">
                 <input type="submit" name="submit" class="btn btn-primary" value="{"button.save"|translate}" />
                 <input type="submit" name="cancel" class="btn" value="{"button.cancel"|translate}" />

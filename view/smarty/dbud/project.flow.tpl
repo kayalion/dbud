@@ -55,6 +55,10 @@
                     <div>
                         <a href="{url id="dbud.repository.deployment" parameters=['repository' => $flow->data->repository->slug, 'branch' => $flow->data->branch]}">{$flow->data->repository->name} ({$flow->data->branch})</a>
                     </div>
+                    <div>
+                        <span class="label label-{$flow->data->state}">{translate key="dbud.state.`$flow->data->state`"}</span> {$flow->data->getFriendlyRevision()}
+                    </div>
+                    <div class="ep"></div>
                 </div>
             {/foreach}
             </div>

@@ -37,6 +37,13 @@ class VirtualBoxBuilderEnvironment extends AbstractBuilderEnvironment {
     protected $password;
 
     /**
+     * Flag to see if the virtual machine should be cloned before running the
+     * builder
+     * @var boolean
+     */
+    protected $cloneMachine;
+
+    /**
      * Sets the name of the virtual machine
      * @param string $name
      * @return null
@@ -73,6 +80,15 @@ class VirtualBoxBuilderEnvironment extends AbstractBuilderEnvironment {
     }
 
     /**
+     * Sets whether the virtual machine should be cloned
+     * @param boolean $clone
+     * @return null
+     */
+    public function setCloneVirtualMachine($clone) {
+        $this->cloneMachine = $clone;
+    }
+
+    /**
      * Runs the builder
      * @return string Log of the builder
      */
@@ -96,9 +112,17 @@ class VirtualBoxBuilderEnvironment extends AbstractBuilderEnvironment {
         $log = '';
 
         try {
-            $machine = $this->name . '-' . String::generate();
+            if ($this->cloneMachine) {
+                $machine = $this->name . '-' . String::generate();
 
-            $variables = $this->getCommandVariables('/tmp/' . $machine);
+                $directory = '/tmp/' . $machine;
+            } else {
+                $machine = $this->name;
+
+                $directory = '/tmp/' . String::generate();
+            }
+
+            $variables = $this->getCommandVariables($directory);
 
             $commands = array(
                 "export HOME=/home/" . $this->username,
@@ -106,8 +130,8 @@ class VirtualBoxBuilderEnvironment extends AbstractBuilderEnvironment {
                 "export DISPLAY=:0.0",
                 "export PATH=\$PATH:/usr/local/bin",
                 "source ~/.phpbrew/bashrc",
-                'mkdir /tmp/' . $machine,
-                'cd /tmp/' . $machine,
+                'mkdir ' . $directory,
+                'cd ' . $directory,
             );
 
             if ($this->builder->copyRepository) {
@@ -115,6 +139,11 @@ class VirtualBoxBuilderEnvironment extends AbstractBuilderEnvironment {
             }
 
             $commands = array_merge($commands, explode("\n", $this->builder->script));
+
+            if ($this->cloneMachine) {
+                $commands[] = 'cd /';
+                $commands[] = 'rm -r ' . $directory;
+            }
 
             $script = "#/bin/sh\n\n";
             foreach ($commands as $index => $command) {
@@ -132,10 +161,12 @@ class VirtualBoxBuilderEnvironment extends AbstractBuilderEnvironment {
             $file = File::getTemporaryFile();
             $file->write($script);
 
-            $log .= "# Creating virtual machine\n";
+            if ($this->cloneMachine) {
+                $log .= "# Creating virtual machine\n";
 
-            $command = 'VBoxManage clonevm ' . $this->name . ' --mode all --options keepallmacs --name ' . $machine . ' --register';
-            $log .= $this->executeCommand($command);
+                $command = 'VBoxManage clonevm ' . $this->name . ' --mode all --options keepallmacs --name ' . $machine . ' --register';
+                $log .= $this->executeCommand($command);
+            }
 
             $log .= "# Starting virtual machine\n";
 
@@ -211,9 +242,11 @@ class VirtualBoxBuilderEnvironment extends AbstractBuilderEnvironment {
             $command = 'VBoxManage controlvm ' . $machine . ' poweroff';
             $this->executeCommand($command);
 
-            $log .= "# Delete virtual machine\n";
-            $command = 'VBoxManage unregistervm ' . $machine . ' --delete';
-            $this->executeCommand($command);
+            if ($this->cloneMachine) {
+                $log .= "# Delete virtual machine\n";
+                $command = 'VBoxManage unregistervm ' . $machine . ' --delete';
+                $this->executeCommand($command);
+            }
 
             if ($error) {
                 throw new Exception($error);

@@ -13,14 +13,6 @@ body .label-error {
     background-color: #b94a48;
 }
 
-body .label-manual {
-    background-color: #c3325f;
-}
-
-body .label-auto {
-    background-color: #7a43b6;
-}
-
  #main {
     /* these two margins settings are here just to ensure that jsPlumb handles
     margins properly.*/
@@ -37,8 +29,6 @@ body .label-auto {
     border-radius: 10px;
     background-color: #F3F3F3;
 }
-
-/* demo elements */
 
 #render {
     padding-top:2px;

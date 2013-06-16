@@ -7,6 +7,8 @@ use dbud\model\RepositoryModel;
 
 use dbud\Module;
 
+use dbud\model\exception\DeployException;
+
 use zibo\library\filesystem\File;
 use zibo\library\Timer;
 
@@ -124,7 +126,7 @@ class ServerDeployJob extends AbstractZiboQueueJob {
         } catch (DeployException $exception) {
             $this->zibo->getLog()->logException($exception);
 
-            $output = $exception->getLog();
+            $output = $exception->getLog() . "\n";
 
             $isError = true;
         }
@@ -158,13 +160,16 @@ class ServerDeployJob extends AbstractZiboQueueJob {
             $this->server->state = Module::STATE_ERROR;
             $serverModel->save($this->server, 'state');
 
-            $activityModelModel->logError($this->server->repository->id, $log, null, 'DbudServer', $this->server->id, $this->getJobId());
+            $activityModel->logError($this->server->repository->id, $log, null, 'DbudServer', $this->server->id, $this->getJobId());
         } else {
             $this->server->revision = $revision;
             $serverModel->save($this->server, 'revision');
 
             $this->server->state = Module::STATE_OK;
             $serverModel->save($this->server, 'state');
+
+            $flowModel = $orm->getDbudFlowModel();
+            $flowModel->onDeploy($this->server);
 
             $activityModel->logActivity($this->server->repository->id, $log, 'DbudServer', $this->server->id, $this->getJobId());
         }

@@ -70,12 +70,6 @@ class ServerData extends Data {
     public $useSsl;
 
     /**
-     * Name of the mode
-     * @var string
-     */
-    public $mode;
-
-    /**
      * Branch in the repository
      * @var string
      */

@@ -41,9 +41,7 @@ class RepositoryUpdateJob extends AbstractZiboQueueJob {
         $orm = $this->zibo->getDependency('zibo\\library\\orm\\OrmManager');
 
         $activityModel = $orm->getDbudActivityModel();
-        $builderModel = $orm->getDbudBuilderModel();
         $repositoryModel = $orm->getDbudRepositoryModel();
-        $serverModel = $orm->getDbudServerModel();
 
         $repository = $repositoryModel->getById($this->repository->id, 0);
         if (!$repository) {
@@ -87,41 +85,22 @@ class RepositoryUpdateJob extends AbstractZiboQueueJob {
                     $repositoryBranch->pullRepository();
                 }
 
-                $revision = $repositoryBranch->getRevision();
-
-                $builders = $builderModel->getBuildersForRepository($repository->id, $branch);
-                if ($builders) {
-                    foreach ($builders as $builder) {
-                        if ($builder->revision == $revision && $builder->state == Module::STATE_OK) {
-                            continue;
-                        }
-
-                        $builder->repository = $repository;
-
-                        $activityModel->queueBuild($builder);
-                    }
-                } else {
-                    $servers = $serverModel->getServersForRepository($repository->id, $branch);
-                    foreach ($servers as $server) {
-                        if ($server->revision == $revision || $server->mode != ServerModel::MODE_AUTOMATIC) {
-                            continue;
-                        }
-
-                        $server->repository = $repository;
-
-                        $activityModel->queueDeploy($server);
-                    }
-                }
+                $revisions[$branch] = $repositoryBranch->getRevision();
             }
 
-            $descriptionFile = new File($directoryHead, '.git/description');
-            $repository->description = $descriptionFile->read();
             $repository->state = Module::STATE_READY;
 
-            $repositoryModel->save($repository, 'description');
             $repositoryModel->save($repository, 'state');
 
-            $activityModel->logActivity($repository->id, 'Updated repository', null, null, $this->getJobId());
+            $flowModel = $orm->getDbudFlowModel();
+            $flowModel->onRepositoryUpdate($repository, $revisions);
+
+            $log = "\n\n";
+            foreach ($revisions as $branch => $revision) {
+                $log .= $branch . ': ' . $revision . "\n";
+            }
+
+            $activityModel->logActivity($repository->id, 'Updated repository' . $log, null, null, $this->getJobId());
         } catch (Exception $exception) {
             $this->repository->state = Module::STATE_ERROR;
 

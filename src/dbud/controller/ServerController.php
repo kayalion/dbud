@@ -79,17 +79,6 @@ class ServerController extends AbstractController {
                 'required' => array(),
             ),
         ));
-        $formBuilder->addRow('mode', 'select', array(
-            'label' => $translator->translate('dbud.label.mode'),
-            'description' => $translator->translate('dbud.label.mode.description'),
-            'options' => array(
-                ServerModel::MODE_MANUAL => $translator->translate('dbud.mode.' . ServerModel::MODE_MANUAL),
-                ServerModel::MODE_AUTOMATIC => $translator->translate('dbud.mode.' . ServerModel::MODE_AUTOMATIC),
-            ),
-            'validators' => array(
-                'required' => array(),
-            ),
-        ));
         $formBuilder->addRow('protocol', 'select', array(
             'label' => $translator->translate('dbud.label.protocol'),
             'description' => $translator->translate('dbud.label.protocol.description'),
