@@ -1,34 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <routes>
-    <route path="/" controller="dbud\controller\IndexController" action="indexAction" methods="get,head" id="dbud.index" />    
-    <route path="/activity" controller="dbud\controller\ActivityController" action="overviewAction" methods="get,head" id="dbud.activity" />    
-    <route path="/hook/repository/%repository%/update/%code%" controller="dbud\controller\RepositoryController" action="autoDeployAction" methods="post" id="dbud.repository.update.auto" />    
-    <route path="/repository" controller="dbud\controller\RepositoryController" action="overviewAction" methods="get,head" id="dbud.repository.overview" />    
-    <route path="/repository" controller="dbud\controller\RepositoryController" action="formAction" methods="post" id="dbud.repository.add.submit" />    
-    <route path="/repository/add" controller="dbud\controller\RepositoryController" action="formAction" methods="get,head" id="dbud.repository.add" />    
-    <route path="/repository/%repository%" controller="dbud\controller\RepositoryController" action="commitsAction" methods="get,head" id="dbud.repository.detail" />    
-    <route path="/repository/%repository%/%branch%/commits" controller="dbud\controller\RepositoryController" action="commitsAction" methods="get,head" id="dbud.repository.commits" dynamic="true" />    
-    <route path="/repository/%repository%/%branch%/commit/%revision%" controller="dbud\controller\RepositoryController" action="commitAction" methods="get,head" id="dbud.repository.commit" />    
-    <route path="/repository/%repository%/%branch%/download" controller="dbud\controller\RepositoryController" action="downloadAction" methods="get,head" id="dbud.repository.download" dynamic="true" />    
-    <route path="/repository/%repository%/%branch%/integration" controller="dbud\controller\RepositoryController" action="integrationAction" methods="get,head" id="dbud.repository.integration" />    
-    <route path="/repository/%repository%/%branch%/integration/build" controller="dbud\controller\RepositoryController" action="buildAction" methods="get,head,post" id="dbud.repository.build" />    
-    <route path="/repository/%repository%/%branch%/integration/builder" controller="dbud\controller\BuilderController" action="formAction" methods="post" id="dbud.builder.add.submit" />    
-    <route path="/repository/%repository%/%branch%/integration/builder/add" controller="dbud\controller\BuilderController" action="formAction" methods="get,head" id="dbud.builder.add" />       
-    <route path="/repository/%repository%/%branch%/integration/builder/%builder%" controller="dbud\controller\BuilderController" action="formAction" methods="post" id="dbud.builder.edit.submit" />    
-    <route path="/repository/%repository%/%branch%/integration/builder/%builder%" controller="dbud\controller\BuilderController" action="formAction" methods="get,head" id="dbud.builder.edit" />    
-    <route path="/repository/%repository%/%branch%/integration/builder/%builder%/delete" controller="dbud\controller\BuilderController" action="deleteAction" methods="get,head,post" id="dbud.builder.delete" />    
-    <route path="/repository/%repository%/%branch%/deployment" controller="dbud\controller\RepositoryController" action="deploymentAction" methods="get,head" id="dbud.repository.deployment" />    
-    <route path="/repository/%repository%/%branch%/deployment/deploy" controller="dbud\controller\RepositoryController" action="deployAction" methods="get,head,post" id="dbud.repository.deploy" />    
-    <route path="/repository/%repository%/%branch%/deployment/server" controller="dbud\controller\ServerController" action="formAction" methods="post" id="dbud.server.add.submit" />    
-    <route path="/repository/%repository%/%branch%/deployment/server/add" controller="dbud\controller\ServerController" action="formAction" methods="get,head" id="dbud.server.add" />       
-    <route path="/repository/%repository%/%branch%/deployment/server/%server%" controller="dbud\controller\ServerController" action="formAction" methods="post" id="dbud.server.edit.submit" />    
-    <route path="/repository/%repository%/%branch%/deployment/server/%server%" controller="dbud\controller\ServerController" action="formAction" methods="get,head" id="dbud.server.edit" />    
-    <route path="/repository/%repository%/%branch%/deployment/server/%server%/delete" controller="dbud\controller\ServerController" action="deleteAction" methods="get,head,post" id="dbud.server.delete" />    
-    <route path="/repository/%repository%/%branch%/files" controller="dbud\controller\RepositoryController" action="filesAction" methods="get,head" id="dbud.repository.files" dynamic="true" />    
-    <route path="/repository/%repository%/activity" controller="dbud\controller\RepositoryController" action="activityAction" methods="get,head" id="dbud.repository.activity" />    
-    <route path="/repository/%repository%/delete" controller="dbud\controller\RepositoryController" action="deleteAction" methods="get,head,post" id="dbud.repository.delete" />    
-    <route path="/repository/%repository%" controller="dbud\controller\RepositoryController" action="formAction" methods="post" id="dbud.repository.edit.submit" />    
-    <route path="/repository/%repository%/edit" controller="dbud\controller\RepositoryController" action="formAction" methods="get,head" id="dbud.repository.edit" />    
-    <route path="/repository/%repository%/update" controller="dbud\controller\RepositoryController" action="updateAction" methods="get,head,post" id="dbud.repository.update" />    
-    <route path="/ssh-key" controller="dbud\controller\IndexController" action="sshKeyAction" methods="get,head" id="dbud.ssh.key" />    
+    <route path="/" controller="dbud\controller\IndexController" action="indexAction" methods="get,head" id="dbud.index" />
+    <route path="/activity" controller="dbud\controller\ActivityController" action="overviewAction" methods="get,head" id="dbud.activity" />
+    <route path="/hook/repository/%repository%/update/%code%" controller="dbud\controller\RepositoryController" action="autoDeployAction" methods="post" id="dbud.repository.update.auto" />
+    <route path="/project" controller="dbud\controller\ProjectController" action="overviewAction" methods="get,head" id="dbud.project.overview" />
+    <route path="/project" controller="dbud\controller\ProjectController" action="formAction" methods="post" id="dbud.project.add.submit" />
+    <route path="/project/add" controller="dbud\controller\ProjectController" action="formAction" methods="get,head" id="dbud.project.add" />
+    <route path="/project/%project%" controller="dbud\controller\ProjectController" action="flowAction" methods="get,head" id="dbud.project.detail" />
+    <route path="/project/%project%/flow" controller="dbud\controller\ProjectController" action="flowSaveAction" methods="post" id="dbud.project.flow.submit" />
+    <route path="/project/%project%" controller="dbud\controller\ProjectController" action="formAction" methods="post" id="dbud.project.edit.submit" />
+    <route path="/project/%project%/edit" controller="dbud\controller\ProjectController" action="formAction" methods="get,head" id="dbud.project.edit" />
+    <route path="/repository" controller="dbud\controller\RepositoryController" action="overviewAction" methods="get,head" id="dbud.repository.overview" />
+    <route path="/repository" controller="dbud\controller\RepositoryController" action="formAction" methods="post" id="dbud.repository.add.submit" />
+    <route path="/repository/add" controller="dbud\controller\RepositoryController" action="formAction" methods="get,head" id="dbud.repository.add" />
+    <route path="/repository/%repository%" controller="dbud\controller\RepositoryController" action="commitsAction" methods="get,head" id="dbud.repository.detail" />
+    <route path="/repository/%repository%/%branch%/commits" controller="dbud\controller\RepositoryController" action="commitsAction" methods="get,head" id="dbud.repository.commits" dynamic="true" />
+    <route path="/repository/%repository%/%branch%/commit/%revision%" controller="dbud\controller\RepositoryController" action="commitAction" methods="get,head" id="dbud.repository.commit" />
+    <route path="/repository/%repository%/%branch%/download" controller="dbud\controller\RepositoryController" action="downloadAction" methods="get,head" id="dbud.repository.download" dynamic="true" />
+    <route path="/repository/%repository%/%branch%/integration" controller="dbud\controller\RepositoryController" action="integrationAction" methods="get,head" id="dbud.repository.integration" />
+    <route path="/repository/%repository%/%branch%/integration/build" controller="dbud\controller\RepositoryController" action="buildAction" methods="get,head,post" id="dbud.repository.build" />
+    <route path="/repository/%repository%/%branch%/integration/builder" controller="dbud\controller\BuilderController" action="formAction" methods="post" id="dbud.builder.add.submit" />
+    <route path="/repository/%repository%/%branch%/integration/builder/add" controller="dbud\controller\BuilderController" action="formAction" methods="get,head" id="dbud.builder.add" />
+    <route path="/repository/%repository%/%branch%/integration/builder/%builder%" controller="dbud\controller\BuilderController" action="formAction" methods="post" id="dbud.builder.edit.submit" />
+    <route path="/repository/%repository%/%branch%/integration/builder/%builder%" controller="dbud\controller\BuilderController" action="formAction" methods="get,head" id="dbud.builder.edit" />
+    <route path="/repository/%repository%/%branch%/integration/builder/%builder%/delete" controller="dbud\controller\BuilderController" action="deleteAction" methods="get,head,post" id="dbud.builder.delete" />
+    <route path="/repository/%repository%/%branch%/deployment" controller="dbud\controller\RepositoryController" action="deploymentAction" methods="get,head" id="dbud.repository.deployment" />
+    <route path="/repository/%repository%/%branch%/deployment/deploy" controller="dbud\controller\RepositoryController" action="deployAction" methods="get,head,post" id="dbud.repository.deploy" />
+    <route path="/repository/%repository%/%branch%/deployment/server" controller="dbud\controller\ServerController" action="formAction" methods="post" id="dbud.server.add.submit" />
+    <route path="/repository/%repository%/%branch%/deployment/server/add" controller="dbud\controller\ServerController" action="formAction" methods="get,head" id="dbud.server.add" />
+    <route path="/repository/%repository%/%branch%/deployment/server/%server%" controller="dbud\controller\ServerController" action="formAction" methods="post" id="dbud.server.edit.submit" />
+    <route path="/repository/%repository%/%branch%/deployment/server/%server%" controller="dbud\controller\ServerController" action="formAction" methods="get,head" id="dbud.server.edit" />
+    <route path="/repository/%repository%/%branch%/deployment/server/%server%/delete" controller="dbud\controller\ServerController" action="deleteAction" methods="get,head,post" id="dbud.server.delete" />
+    <route path="/repository/%repository%/%branch%/files" controller="dbud\controller\RepositoryController" action="filesAction" methods="get,head" id="dbud.repository.files" dynamic="true" />
+    <route path="/repository/%repository%/activity" controller="dbud\controller\RepositoryController" action="activityAction" methods="get,head" id="dbud.repository.activity" />
+    <route path="/repository/%repository%/delete" controller="dbud\controller\RepositoryController" action="deleteAction" methods="get,head,post" id="dbud.repository.delete" />
+    <route path="/repository/%repository%" controller="dbud\controller\RepositoryController" action="formAction" methods="post" id="dbud.repository.edit.submit" />
+    <route path="/repository/%repository%/edit" controller="dbud\controller\RepositoryController" action="formAction" methods="get,head" id="dbud.repository.edit" />
+    <route path="/repository/%repository%/update" controller="dbud\controller\RepositoryController" action="updateAction" methods="get,head,post" id="dbud.repository.update" />
+    <route path="/ssh-key" controller="dbud\controller\IndexController" action="sshKeyAction" methods="get,head" id="dbud.ssh.key" />
 </routes>

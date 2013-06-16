@@ -18,7 +18,7 @@
         <format name="title">{name}</format>
         <format name="teaser">{repository}</format>
     </model>
-    
+
     <model name="DbudBuilder" modelClass="dbud\model\BuilderModel" dataClass="dbud\model\data\BuilderData" log="true">
         <field name="repository" model="DbudRepository" relation="belongsTo">
             <validation name="required" />
@@ -43,7 +43,7 @@
         <format name="title">{name}</format>
         <format name="teaser">{repository.name}</format>
     </model>
-    
+
     <model name="DbudServer" modelClass="dbud\model\ServerModel" dataClass="dbud\model\data\ServerData" log="true">
         <field name="repository" model="DbudRepository" relation="belongsTo">
             <validation name="required" />
@@ -88,16 +88,43 @@
     <model name="DbudActivity" modelClass="dbud\model\ActivityModel" dataClass="dbud\model\data\ActivityData">
         <field name="repository" model="DbudRepository" relation="belongsTo">
             <validation name="required" />
-        </field>    
+        </field>
         <field name="dataType" type="string" />
         <field name="dataId" type="string" />
         <field name="description" type="text">
             <validation name="required" />
-        </field>    
+        </field>
         <field name="job" model="Queue" relation="belongsTo" dependant="true" />
         <field name="state" type="string">
             <validation name="required" />
         </field>
         <field name="dateAdded" type="datetime" />
+    </model>
+
+    <model name="DbudProject" modelClass="dbud\model\ProjectModel" dataClass="dbud\model\data\ProjectData" log="true">
+        <field name="name" type="string">
+            <validation name="required" />
+        </field>
+        <field name="repositories" model="DbudRepository" relation="hasMany">
+            <validation name="required" />
+        </field>
+        <field name="flow" model="DbudFlow" relation="hasMany" />
+        <field name="slug" type="string">
+            <validation name="required" />
+        </field>
+
+        <format name="title">{name}</format>
+        <format name="teaser">{repository}</format>
+    </model>
+
+    <model name="DbudFlow" modelClass="dbud\model\FlowModel" dataClass="dbud\model\data\FlowData">
+        <field name="project" model="DbudProject" relation="belongsTo">
+            <validation name="required" />
+        </field>
+        <field name="dataType" type="string" />
+        <field name="dataId" type="string" />
+        <field name="positionTop" type="string" />
+        <field name="positionLeft" type="string" />
+        <field name="previous" model="DbudFlow" relation="belongsTo" />
     </model>
 </models>

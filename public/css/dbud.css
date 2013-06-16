@@ -1,8 +1,8 @@
 body .console {
-	background-color: #222;
-	color: #f3f3f3;
-	font-family: monospace;
-	padding: 5px;
+    background-color: #222;
+    color: #f3f3f3;
+    font-family: monospace;
+    padding: 5px;
 }
 
 body .label-ok {
@@ -14,9 +14,87 @@ body .label-error {
 }
 
 body .label-manual {
-	background-color: #c3325f;
+    background-color: #c3325f;
 }
 
 body .label-auto {
-	background-color: #7a43b6;
+    background-color: #7a43b6;
 }
+
+ #main {
+    /* these two margins settings are here just to ensure that jsPlumb handles
+    margins properly.*/
+    margin-left: auto;
+    position: relative;
+    font-size: 80%;
+    margin-right: auto;
+    margin-bottom: 25px;
+    width: 800px;
+    border: 1px solid #DDD;
+    min-height: 400px;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+    background-color: #F3F3F3;
+}
+
+/* demo elements */
+
+#render {
+    padding-top:2px;
+    margin-left:auto;
+    margin-right:auto;
+    z-index:5000;
+    margin-top:0px;
+    text-align: center;
+    background-color:white;
+}
+
+#render ul {
+    padding-left:1em;
+}
+#render ul li {
+    list-style-type:none;
+}
+#render h5 {
+    display:inline;
+}
+
+.w {
+    background-color: #fff;
+    width:130px;
+    padding:1em;
+    position:absolute;
+    border: 1px solid black;
+    z-index:4;
+    border-radius:1em;
+    border:1px solid #AAA;
+    border-radius:0.5em;
+    cursor:move;
+}
+
+.aLabel {
+    background-color:white;
+    padding:0.3em;
+}
+
+.ep {
+    float:right;
+    width:1em;
+    height:1em;
+    background-color:#0088CC;
+    cursor:pointer;
+}
+
+._jsPlumb_endpoint {
+    z-index:3;
+}
+
+#repository-0 {
+    left: 335px;
+    top:1em;
+}
+
+.dragHover { border:1px dotted red; }
+
+path { cursor:pointer; }

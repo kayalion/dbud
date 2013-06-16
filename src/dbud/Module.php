@@ -58,11 +58,21 @@ class Module {
      * @return null
      */
     public function prepareTaskbar(Zibo $zibo, Taskbar $taskbar) {
+        $applicationsMenu = $taskbar->getApplicationsMenu();
+
+        $menuItem = new MenuItem();
+        $menuItem->setTranslation('dbud.title.activity');
+        $menuItem->setRoute('dbud.activity');
+        $applicationsMenu->addMenuItem($menuItem);
+
         $menuItem = new MenuItem();
         $menuItem->setTranslation('dbud.title.repository.overview');
         $menuItem->setRoute('dbud.repository.overview');
+        $applicationsMenu->addMenuItem($menuItem);
 
-        $applicationsMenu = $taskbar->getApplicationsMenu();
+        $menuItem = new MenuItem();
+        $menuItem->setTranslation('dbud.title.project.overview');
+        $menuItem->setRoute('dbud.project.overview');
         $applicationsMenu->addMenuItem($menuItem);
     }
 
