@@ -107,7 +107,6 @@ abstract class AbstractBuilderEnvironment implements BuilderEnvironment {
      * @throws Exception
      */
     protected function executeCommand($command) {
-        $log = '';
         $output = array();
 
         if ($this->log) {
@@ -120,15 +119,26 @@ abstract class AbstractBuilderEnvironment implements BuilderEnvironment {
 
         exec($command, $output, $returnVar);
 
-        foreach ($output as $line) {
-            $log .= '# | ' . $line . "\n";
-        }
-
         if ($returnVar !== 0) {
             throw new Exception('Command returned code ' . $returnVar . ': ' . $command);
+        }
+
+        return $this->parseCommandOutput($output);
+    }
+
+    /**
+     * Parses the output of a command to log output
+     * @param array $output
+     * @return string
+     */
+    protected function parseCommandOutput(array $output) {
+        $log = '';
+
+        foreach ($output as $line) {
+            $log .= '# | ' . $line . "\n";
         }
 
         return $log;
     }
 
-}
+ }

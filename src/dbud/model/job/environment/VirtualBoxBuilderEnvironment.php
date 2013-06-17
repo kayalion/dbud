@@ -170,9 +170,17 @@ class VirtualBoxBuilderEnvironment extends AbstractBuilderEnvironment {
 
             $log .= "# Starting virtual machine\n";
 
-            $command = 'virtualbox --startvm ' . $machine . ' > /dev/null &';
+            $tmpFile = File::getTemporaryFile();
+
+            $command = 'virtualbox --startvm ' . $machine . ' >  ' . $tmpFile . ' &';
             $log .= $this->executeCommand($command);
             $this->executeCommand('sleep ' . $this->bootTime);
+
+            $output = trim($tmpFile->read());
+            if ($output) {
+                $log .= $this->parseCommandOutput(explode("\n", $output));
+            }
+            $tmpFile->delete();
 
             $log .= "# Copy builder script to virtual machine\n";
             $command = 'VBoxManage guestcontrol ' . $machine . ' copyto ' . $file . ' /home/' . $this->username . '/builder.sh --username ' . $this->username . ' --password ' . $this->password;
