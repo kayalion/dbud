@@ -93,6 +93,9 @@ class BuilderRunJob extends AbstractZiboQueueJob {
         $this->builder->dateBuilt = time();
         $builderModel->save($this->builder, 'dateBuilt');
 
+        $this->builder->revision = $revision;
+        $builderModel->save($this->builder, 'revision');
+
         if ($exception) {
             $this->builder->state = Module::STATE_ERROR;
             $builderModel->save($this->builder, 'state');
@@ -103,9 +106,6 @@ class BuilderRunJob extends AbstractZiboQueueJob {
 
             return;
         }
-
-        $this->builder->revision = $revision;
-        $builderModel->save($this->builder, 'revision');
 
         $this->builder->state = Module::STATE_OK;
         $builderModel->save($this->builder, 'state');

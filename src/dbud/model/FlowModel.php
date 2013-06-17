@@ -220,7 +220,7 @@ class FlowModel extends GenericModel {
                     }
                 }
 
-                if ($revision && $builder->revision == $revision && $builder->state == Module::STATE_OK) {
+                if ($revision && $builder->revision == $revision) {
                     break;
                 }
 
