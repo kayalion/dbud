@@ -146,6 +146,16 @@ class ActivityModel extends GenericModel {
      * @return null
      */
     public function queueRepositoryUpdate($repository) {
+        $query = $this->createQuery();
+        $query->addCondition('{repository} = %1%', $repository->id);
+        $query->addCondition('{dataType} IS NULL AND {dataId} IS NULL');
+        $query->addCondition('{job.className} = %1%', 'dbud\\model\\job\\RepositoryUpdateJob');
+        $query->addCondition('{job.status} = %1%', QueueModel::STATUS_WAITING);
+
+        if ($query->count()) {
+            return;
+        }
+
         $job = new RepositoryUpdateJob();
         $job->setRepository($repository);
 
